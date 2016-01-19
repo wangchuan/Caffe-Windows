@@ -1,3 +1,61 @@
+### Setup in Windows
+1. Download `Caffe-Windows` from [Github](https://github.com/happynear/caffe-windows)
+```bash
+git clone https://github.com/happynear/caffe-windows.git
+```
+
+2. In directory `./BuildVS2013/` open the `.sln` file. For project `caffelib`, configure the `Additional Include Directories` and `Additional Library Directories` as following (directly copy, note to specify the directories of `opencv` and `boost`, and currently only supports [Boost 1.56](http://nchc.dl.sourceforge.net/project/boost/boost-binaries/1.56.0/boost_1_56_0-msvc-12.0-64.exe))
+
+- Additional Include Directories (Debug and Release)
+	```cpp
+	../../src;../../include;../../3rdparty/include/openblas;../../3rdparty/include/lmdb;../../3rdparty/include/hdf5;../../3rdparty/include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include;D:\Libs\opencv300\build\include;D:\Libs\opencv300\build\include\opencv;D:\Libs\opencv300\build\include\opencv2;D:\Libs\boost_1_56_0
+	```
+
+- Additional Library Directories (Debug and Release)
+	```cpp
+	../../3rdparty/lib;D:\Libs\boost_1_56_0\lib64-msvc-12.0;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\lib\x64;D:\Libs\opencv300\build\x64\vc12\lib 
+	```
+
+- Library Input (Debug)
+	```cpp
+	opencv_ts300d.lib;opencv_world300d.lib;gflagsd.lib;libglog.lib;libopenblas.dll.a;libprotobufd.lib;libprotoc.lib;leveldbd.lib;lmdbd.lib;libhdf5_D.lib;libhdf5_hl_D.lib;Shlwapi.lib;cudart.lib;cuda.lib;nppi.lib;cufft.lib;cublas.lib;curand.lib;cudnn.lib;%(AdditionalDependencies)
+	```
+	
+- Library Input (Release)
+	```cpp
+	opencv_ts300.lib;opencv_world300.lib;gflags.lib;libglog.lib;libopenblas.dll.a;libprotobuf.lib;libprotoc.lib;leveldb.lib;lmdb.lib;libhdf5.lib;libhdf5_hl.lib;Shlwapi.lib;cudart.lib;cuda.lib;nppi.lib;cufft.lib;cublas.lib;curand.lib;cudnn.lib;%(AdditionalDependencies)
+	```
+
+	For project `caffe`, set as above and also remember to add `../../bin` as the include directory and `caffelib(d).lib` as the input.
+
+3. Code Modifications
+	- Comment `blob.hpp (Line 140)` and remove `USE_CUDNN` in Preprocessor to make it 3d convolution supported. (if only using 2D convolution, reverse the operations)
+	```cpp
+	//CHECK_LE(num_axes(), 4)
+    //    << "Cannot use legacy accessors on Blobs with > 4 axes."; 
+	```
+	- Add `return NULL` below `LOG(FATAL) << "Unknown database backend";` at `db.cpp (Line 20)`. 
+	- Comment `DCHECK_LT(label_value, num_labels);` at `accuracy_layer.cpp (Line 71)` to allow label ID larger than number of labels.
+	- Modify `FLAGS_log_dir = ".\\log\\";` to `FLAGS_log_dir = string(".\\log\\");` at `common.cpp (Line 63)`.
+
+
+4. To compile MatCaffe in Windows, the directories and library input should be like this
+	- Additional Include Directories (Release only is sufficient)
+	```cpp
+	../../3rdparty/include;../../src;../../include;D:\Program Files\MATLAB\R2014b\extern\include;D:\Libs\boost_1_56_0;%(AdditionalIncludeDirectories)
+	```
+	
+	- Additional Library Directories (Release only is sufficient)
+	```cpp
+	../../3rdparty/lib;../../bin;D:\Program Files\MATLAB\R2014b\extern\lib\win64\microsoft;D:\Libs\opencv300\build\x64\vc12\lib;D:\Libs\boost_1_56_0\lib64-msvc-12.0;%(AdditionalLibraryDirectories)
+	```
+
+	- Library Input (Release only is sufficient)
+	```cpp
+	caffelib.lib;opencv_ts300.lib;opencv_world300.lib;gflags.lib;libglog.lib;libopenblas.dll.a;libprotobuf.lib;libprotoc.lib;leveldb.lib;lmdb.lib;libhdf5.lib;libhdf5_hl.lib;Shlwapi.lib;cudart.lib;cuda.lib;nppi.lib;cufft.lib;cublas.lib;curand.lib;cudnn.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)
+	```
+
+---------------------
 Forked from https://www.github.com/BVLC/caffe master branch in 2015/11/09 . Next update time may be around 2016/01/01 .
 
 I have made a list of some frequently asked questions in [FAQ.md](FAQ.md). If you get confused during configuring, please firstly look up for your question in the [FAQ.md](FAQ.md). This FAQ list is still under construction, I will keep adding questions into it.
