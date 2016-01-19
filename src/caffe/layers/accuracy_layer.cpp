@@ -68,7 +68,7 @@ void AccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       }
       if (top.size() > 1) ++nums_buffer_.mutable_cpu_data()[label_value];
       DCHECK_GE(label_value, 0);
-      DCHECK_LT(label_value, num_labels);
+      //DCHECK_LT(label_value, num_labels); // comment by cwang to allow this case
       // Top-k accuracy
       std::vector<std::pair<Dtype, int> > bottom_data_vector;
       for (int k = 0; k < num_labels; ++k) {

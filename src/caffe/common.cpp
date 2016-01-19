@@ -60,7 +60,7 @@ int64_t cluster_seedgen(void) {
 }
 
 void initGlog() {
-  FLAGS_log_dir = ".\\log\\";
+  FLAGS_log_dir = string(".\\log\\");
   _mkdir(FLAGS_log_dir.c_str());
   std::string LOG_INFO_FILE;
   std::string LOG_WARNING_FILE;

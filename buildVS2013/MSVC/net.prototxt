@@ -1,0 +1,332 @@
+name: "net"
+# -> data: N x C x Z x H x W
+layer
+{
+	name: "facelabel"
+	type: "HDF5Data"
+	top: "facedata"
+	top: "label"
+	include
+	{
+		phase: TRAIN
+	}
+	hdf5_data_param
+	{
+		source: "./train.txt"
+		batch_size: 64
+	}
+}
+
+layer
+{
+	name: "facelabel"
+	type: "HDF5Data"
+	top: "facedata"
+	top: "label"
+	include
+	{
+		phase: TEST
+	}
+	hdf5_data_param
+	{
+		source: "./test.txt"
+		batch_size: 64
+	}
+}
+
+layer
+{
+	name: "conv1"
+	type: "Convolution"
+	bottom: "facedata"
+	top: "conv1"
+	param
+	{
+		lr_mult: 1
+	}
+	param
+	{
+		lr_mult: 1
+	}
+	convolution_param
+	{
+		num_output: 3
+		pad: 1
+		pad: 1
+		pad: 1
+		axis: 1
+		kernel_size: 3
+		kernel_size: 3
+		kernel_size: 3
+		stride: 1
+		weight_filler
+		{
+			type: "xavier"
+			#type: "gaussian"
+			#std: 0.005
+			#mean: 0.01
+		}
+		bias_filler
+		{
+			type: "constant"
+			value: 0.1
+		}
+	}
+}
+layer
+{
+	name: "reluconv1"
+	type: "ReLU"
+	bottom: "conv1"
+	top: "conv1"
+}
+
+layer
+{
+	name: "conv2"
+	type: "Convolution"
+	bottom: "conv1"
+	top: "conv2"
+	param
+	{
+		lr_mult: 1
+	}
+	param
+	{
+		lr_mult: 1
+	}
+	convolution_param
+	{
+		num_output: 3
+		pad: 1
+		pad: 1
+		pad: 1
+		axis: 1
+		kernel_size: 3
+		kernel_size: 3
+		kernel_size: 3
+		stride: 1
+		weight_filler
+		{
+			type: "xavier"
+			#type: "gaussian"
+			#std: 0.005
+			#mean: 0.01
+		}
+		bias_filler
+		{
+			type: "constant"
+			value: 0.1
+		}
+	}
+}
+layer
+{
+	name: "reluconv2"
+	type: "ReLU"
+	bottom: "conv2"
+	top: "conv2"
+}
+
+layer
+{
+	name: "conv3"
+	type: "Convolution"
+	bottom: "conv2"
+	top: "conv3"
+	param
+	{
+		lr_mult: 1
+	}
+	param
+	{
+		lr_mult: 1
+	}
+	convolution_param
+	{
+		num_output: 3
+		axis: 1
+		pad: 1
+		pad: 1
+		pad: 1
+		kernel_size: 3
+		kernel_size: 3
+		kernel_size: 3
+		stride: 1
+		weight_filler
+		{
+			type: "xavier"
+			#type: "gaussian"
+			#std: 0.005
+			#mean: 0.01
+		}
+		bias_filler
+		{
+			type: "constant"
+			value: 0.1
+		}
+	}
+}
+layer
+{
+	name: "reluconv3"
+	type: "ReLU"
+   	bottom: "conv3"
+	top: "conv3"
+}
+
+layer
+{
+	name: "ip1"
+	type: "InnerProduct"
+   	bottom: "conv3"
+	top: "ip1"
+	param
+	{
+		lr_mult: 1
+ 	}
+	param
+	{
+		lr_mult: 1
+ 	}
+	inner_product_param
+	{
+		num_output: 1024
+		weight_filler
+		{
+			type: "xavier"
+		}
+		bias_filler
+		{
+			type: "constant"
+			value: 0.01
+		}
+	}
+}
+
+layer {
+  name: "drop1"
+  type: "Dropout"
+  bottom: "ip1"
+  top: "ip1"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer
+{
+	name: "relu1"
+	type: "ReLU"
+   	bottom: "ip1"
+	top: "ip1"
+}
+
+layer
+{
+	name: "ip2"
+	type: "InnerProduct"
+   	bottom: "ip1"
+	top: "ip2"
+	param
+	{
+		lr_mult: 1
+ 	}
+	param
+	{
+		lr_mult: 1
+ 	}
+	inner_product_param
+	{
+		num_output: 512
+		weight_filler
+		{
+			type: "xavier"
+		}
+		bias_filler
+		{
+			type: "constant"
+			value: 0.01
+		}
+	}
+}
+
+layer {
+  name: "drop2"
+  type: "Dropout"
+  bottom: "ip2"
+  top: "ip2"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer
+{
+	name: "relu2"
+	type: "ReLU"
+   	bottom: "ip2"
+	top: "ip2"
+}
+
+layer
+{
+	name: "ip3"
+	type: "InnerProduct"
+	bottom: "ip2"
+	top: "ip3"
+	param
+	{
+		lr_mult: 1
+ 	}
+	param
+	{
+		lr_mult: 1
+ 	}
+	inner_product_param
+	{
+		num_output: 2
+		weight_filler
+		{
+			type: "xavier"
+		}
+		bias_filler
+		{
+			type: "constant"
+			value: 0.01
+		}
+	}
+}
+
+layer {
+  name: "prob"
+  type: "Softmax"
+  bottom: "ip3"
+  top: "prob"
+	include
+	{
+		phase: TEST
+ 	}
+}
+
+layer
+{
+	name: "accuracy"
+	type: "Accuracy"
+   	bottom: "prob"
+	bottom: "label"
+	top: "accuracy"
+	include
+	{
+		phase: TEST
+ 	}
+}
+
+layer
+{
+	name: "loss"
+	type: "SoftmaxWithLoss"
+   	bottom: "ip3"
+	bottom: "label"
+	top: "loss"
+}
